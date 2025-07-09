@@ -168,6 +168,19 @@ app.get('/api/widget-config', async (req, res) => {
   }
 });
 
+// Environment detection endpoint
+app.get('/api/environment', (req, res) => {
+  const isDevelopment = process.env.NODE_ENV === 'development' || 
+                        process.env.DEBUG_MODE === 'true' ||
+                        process.env.PORT === '3001';
+  
+  res.json({ 
+    isDevelopment,
+    environment: process.env.NODE_ENV || 'production',
+    debugMode: process.env.DEBUG_MODE === 'true'
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

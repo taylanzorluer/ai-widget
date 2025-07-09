@@ -9,8 +9,50 @@ const ChatWidget = () => {
   const [conversationId, setConversationId] = useState(null);
   const [wsConnection, setWsConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isDev, setIsDev] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Environment detection function
+  const isDevelopment = () => {
+    // Check multiple indicators for development environment
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    const protocol = window.location.protocol;
+    
+    // Development indicators
+    const devHosts = ['localhost', '127.0.0.1', '0.0.0.0'];
+    const devPorts = ['3000', '3001', '8080', '5000', '4200'];
+    const isDevHost = devHosts.includes(hostname);
+    const isDevPort = devPorts.includes(port);
+    const isFileProtocol = protocol === 'file:';
+    
+    // Check for development environment variables (if available)
+    const isReactDev = process.env.NODE_ENV === 'development';
+    
+    // Check for development URL patterns
+    const isDevUrl = hostname.includes('.local') || 
+                     hostname.includes('dev.') || 
+                     hostname.includes('staging.') ||
+                     hostname.includes('test.');
+    
+    // Return true if any development indicator is found
+    return isReactDev || isDevHost || isDevPort || isFileProtocol || isDevUrl;
+  };
+
+  // Fetch environment info from server
+  const fetchEnvironment = async () => {
+    try {
+      const response = await fetch('/api/environment');
+      const envData = await response.json();
+      setIsDev(envData.isDevelopment || isDevelopment());
+      console.log('Environment:', envData);
+    } catch (error) {
+      // Fallback to client-side detection
+      setIsDev(isDevelopment());
+      console.log('Using client-side environment detection');
+    }
+  };
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -30,6 +72,7 @@ const ChatWidget = () => {
     fetchConfig(agentId);
     fetchWidgetConfig(agentId);
     connectWebSocket(agentId);
+    fetchEnvironment();
     
     // Cleanup WebSocket on unmount
     return () => {
@@ -253,7 +296,7 @@ const ChatWidget = () => {
         <div className="header-content">
           <div className="header-info">
             <h2>{config.title}</h2>
-            {window.location.hostname === 'localhost' && (
+            {isDev && (
               <div className="connection-status">
                 <span className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`}></span>
                 {isConnected ? 'Connected' : 'Disconnected'}
