@@ -178,15 +178,36 @@ const ChatWidget = () => {
         }
       };
       
-      ws.onclose = () => {
-        console.log('WebSocket disconnected');
+      ws.onclose = (event) => {
+        console.log('WebSocket disconnected:', event.code, event.reason);
         setIsConnected(false);
         setWsConnection(null);
+        
+        // If connection was closed unexpectedly (not by user), show message
+        if (event.code !== 1000 && event.reason !== 'Conversation ended by user') {
+          console.log('Unexpected disconnection detected');
+          setMessages(prev => [...prev.filter(msg => msg.id !== 'typing'), {
+            id: Date.now(),
+            text: 'Connection lost. Please refresh the page to reconnect.',
+            sender: 'ai',
+            timestamp: new Date().toISOString()
+          }]);
+          setIsLoading(false);
+        }
       };
       
       ws.onerror = (error) => {
         console.error('WebSocket error:', error);
         setIsConnected(false);
+        setIsLoading(false);
+        
+        // Add error message to chat
+        setMessages(prev => [...prev.filter(msg => msg.id !== 'typing'), {
+          id: Date.now(),
+          text: 'Connection error occurred. Please check your internet connection and refresh the page.',
+          sender: 'ai',
+          timestamp: new Date().toISOString()
+        }]);
       };
     } catch (error) {
       console.error('Failed to connect WebSocket:', error);
@@ -280,14 +301,40 @@ const ChatWidget = () => {
   };
 
   const endConversation = () => {
+    console.log('Ending conversation...');
+    
+    // Send conversation termination to ElevenLabs if connected
     if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-      wsConnection.close();
+      try {
+        // Send conversation end message to ElevenLabs
+        wsConnection.send(JSON.stringify({
+          type: 'conversation_end',
+          conversation_id: conversationId
+        }));
+        
+        console.log('Conversation termination message sent');
+        
+        // Give some time for the message to be sent, then close
+        setTimeout(() => {
+          if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+            wsConnection.close(1000, 'Conversation ended by user');
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Error sending conversation end message:', error);
+        // Force close if there's an error
+        wsConnection.close(1000, 'Conversation ended by user');
+      }
     }
+    
+    // Reset all conversation state
     setMessages([]);
     setConversationId(null);
     setIsConnected(false);
     setWsConnection(null);
     setIsLoading(false);
+    
+    console.log('Conversation ended and state reset');
   };
 
   return (
