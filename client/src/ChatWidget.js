@@ -253,11 +253,12 @@ const ChatWidget = () => {
         <div className="header-content">
           <div className="header-info">
             <h2>{config.title}</h2>
-            <p>{config.subtitle}</p>
-            <div className="connection-status">
-              <span className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`}></span>
-              {isConnected ? 'Connected' : 'Disconnected'}
-            </div>
+            {window.location.hostname === 'localhost' && (
+              <div className="connection-status">
+                <span className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`}></span>
+                {isConnected ? 'Connected' : 'Disconnected'}
+              </div>
+            )}
           </div>
           <button className="end-conversation-btn" onClick={endConversation} title="End Conversation">
             <svg viewBox="0 0 24 24" width="20" height="20">
