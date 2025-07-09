@@ -27,7 +27,7 @@ const ChatWidget = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const agentId = urlParams.get('agentId');
     
-    fetchConfig();
+    fetchConfig(agentId);
     fetchWidgetConfig(agentId);
     connectWebSocket(agentId);
     
@@ -40,11 +40,17 @@ const ChatWidget = () => {
     // eslint-disable-next-line
   }, []);
 
-  const fetchConfig = async () => {
+  const fetchConfig = async (agentId) => {
     try {
-      const response = await fetch('/api/config');
+      let url = '/api/config';
+      if (agentId) {
+        url += `?agentId=${encodeURIComponent(agentId)}`;
+      }
+      
+      const response = await fetch(url);
       const configData = await response.json();
       setConfig(configData);
+      console.log('Widget config loaded:', configData);
     } catch (error) {
       console.error('Failed to load config:', error);
     }

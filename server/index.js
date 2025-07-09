@@ -35,11 +35,62 @@ app.post('/api/chat', (req, res) => {
 });
 
 // Widget configuration endpoint
-app.get('/api/config', (req, res) => {
-  res.json({
+app.get('/api/config', async (req, res) => {
+  const agentId = req.query.agentId || process.env.ELEVENLABS_AGENT_ID;
+  
+  // Default config
+  let config = {
     title: process.env.WIDGET_TITLE || 'AI Assistant',
     subtitle: process.env.WIDGET_SUBTITLE || 'How can I help you today?'
-  });
+  };
+  
+  // If agent ID is provided, try to get title from ElevenLabs
+  if (agentId) {
+    const now = Date.now();
+    const cacheKey = `agent_config_${agentId}`;
+    
+    // Check cache first
+    if (agentConfigCache[cacheKey] && (now - agentConfigCache[cacheKey].timestamp) < CACHE_DURATION) {
+      const cachedConfig = agentConfigCache[cacheKey].data;
+      config.title = cachedConfig.title;
+      config.subtitle = cachedConfig.subtitle;
+      console.log('Using cached agent config:', { title: config.title, subtitle: config.subtitle });
+      return res.json(config);
+    }
+    
+    try {
+      const response = await axios.get(`https://api.elevenlabs.io/v1/convai/agents/${agentId}`, {
+        headers: {
+          'xi-api-key': process.env.ELEVENLABS_API_KEY
+        }
+      });
+      
+      const agentData = response.data;
+      
+      // Use agent name as title if available
+      if (agentData.name) {
+        config.title = agentData.name;
+      }
+      
+      // Use agent description as subtitle if available
+      if (agentData.description) {
+        config.subtitle = agentData.description;
+      }
+      
+      // Cache the result
+      agentConfigCache[cacheKey] = {
+        data: { title: config.title, subtitle: config.subtitle },
+        timestamp: now
+      };
+      
+      console.log('Agent config loaded and cached:', { title: config.title, subtitle: config.subtitle });
+    } catch (error) {
+      console.error('Failed to fetch agent config:', error.response?.data || error.message);
+      // Continue with default config
+    }
+  }
+  
+  res.json(config);
 });
 
 // Agent configuration endpoint
@@ -51,6 +102,7 @@ app.get('/api/agent-config', (req, res) => {
 
 // Widget configuration cache
 let widgetConfigCache = {};
+let agentConfigCache = {};
 let lastFetchTime = 0;
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
