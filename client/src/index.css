@@ -77,6 +77,11 @@ body {
   background-color: #28a745;
 }
 
+.status-dot.connecting {
+  background-color: #ffc107;
+  animation: pulse-dot 1s infinite;
+}
+
 .status-dot.disconnected {
   background-color: #dc3545;
 }
@@ -253,6 +258,15 @@ body {
   40% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
