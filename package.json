@@ -28,6 +28,6 @@
     "nodemon": "^3.0.1"
   },
   "keywords": ["chat", "widget", "ai", "tts", "elevenlabs"],
-  "author": "Taylan Zorluer",
+  "author": "Noname",
   "license": "MIT"
 } 
