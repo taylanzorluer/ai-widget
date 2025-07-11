@@ -331,21 +331,25 @@ window.AIChatWidget.clearCache() // Clear cache
 ```javascript
 // Common Issues and Solutions:
 
-1. "Chat ended" message appears:
-   - Expected behavior after close button or connection loss
+1. "Sohbet kapatıldı" (Chat ended) message appears:
+   - Expected behavior after manual close (X button)
    - Solution: Refresh the page to start new conversation
 
-2. Input field disabled:
-   - Occurs when chat is intentionally ended
-   - Solution: Refresh the page to re-enable
+2. "Bağlantı kesildi" (Connection lost) message appears:
+   - Expected behavior after timeout or network error
+   - Solution: Start typing - connection will auto-reconnect
 
-3. No reconnection after network error:
-   - Intentional behavior to prevent cost escalation
-   - Solution: Refresh the page to reconnect
+3. Input field disabled:
+   - Occurs when chat is manually ended (X button)
+   - Solution: Refresh the page to re-enable
 
 4. Multiple connection attempts:
    - Check for proper cleanup in endConversation()
    - Ensure isIntentionalDisconnect flag is set correctly
+
+5. Agent ID placeholder warning:
+   - Using test.example.html with placeholder agent ID
+   - Solution: Copy to test.html and add real agent ID
 ```
 
 ## 📦 Build Process

@@ -104,14 +104,18 @@ Server runs on `http://localhost:3001`
 
 ### 4. Embed Widget
 
-#### **Method 1: Use Example File (Recommended)**
+#### **Method 1: Use Example Files (Recommended)**
 ```bash
-# Copy the example file to your project
-cp example.html your-website.html
+# For production websites - copy and customize:
+cp test.example.html your-website.html
+
+# For testing - copy and add real agent ID:
+cp test.example.html test.html
+# Then edit test.html with your real agent ID (DO NOT commit test.html!)
 
 # Edit the script tag with your details:
-# - Replace "your-domain.com" with your domain
-# - Replace "your_agent_id_here" with your ElevenLabs agent ID
+# - Replace "your-domain.com" with your domain  
+# - Replace "YOUR_AGENT_ID_HERE" with your ElevenLabs agent ID
 ```
 
 #### **Method 2: Manual Integration**
@@ -284,9 +288,20 @@ Development features (localhost only):
 ## 🧪 Testing
 
 ### **Test Pages**
-- **Test Page**: `http://localhost:3001/test.html` - Development testing
-- **Example Page**: `example.html` - Production-ready example file
+- **Test Example**: `test.example.html` - Safe template with placeholder agent ID
+- **Test Page**: `public/test.html` - Development testing (excluded from git)
 - **Widget Direct**: `http://localhost:3001/widget` - Direct widget access
+
+### **Security Note**
+```bash
+# SAFE: Files with placeholder IDs (can be committed)
+test.example.html         ✅ Safe to commit
+
+# RISKY: Files with real credentials (DO NOT commit)
+test.html                 ❌ Contains real agent ID - excluded from git
+public/test.html          ❌ Contains real agent ID - excluded from git
+.env                      ❌ Contains real API keys - excluded from git
+```
 
 ### **Debug Console**
 ```javascript

@@ -69,7 +69,9 @@ dist
 
 # Gatsby files
 .cache/
-public
+
+# Public assets (contains test files with real credentials)
+public/
 
 # Storybook build outputs
 .out
@@ -94,6 +96,3 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Generated widget embed script
-public/widget.js

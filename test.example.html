@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Widget Test Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 40px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            font-weight: 500;
+        }
+        .info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 5px solid #2196f3;
+            color: #0d47a1;
+        }
+        .success {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            border-left: 5px solid #4caf50;
+            color: #2e7d32;
+        }
+        .error {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border-left: 5px solid #f44336;
+            color: #c62828;
+        }
+        .warning {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 5px solid #ff9800;
+            color: #e65100;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+            font-size: 0.9em;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .test-button:active {
+            transform: translateY(0);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        #debug-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        ol {
+            line-height: 1.6;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Chat Widget Test</h1>
+        
+        <div class="status warning">
+            <strong>⚠️ ÖNEMLI GÜVENLIK UYARISI:</strong>
+            <p>Bu dosya bir örnek (example) dosyasıdır. Gerçek kullanım için:</p>
+            <ol>
+                <li>Bu dosyayı kopyalayın: <code>cp test.example.html test.html</code></li>
+                <li><code>YOUR_AGENT_ID_HERE</code> kısmını gerçek ElevenLabs agent ID'niz ile değiştirin</li>
+                <li>Gerçek agent ID'li dosyaları asla git'e commit etmeyin!</li>
+            </ol>
+        </div>
+        
+        <div class="status info">
+            <strong>Test Talimatları:</strong>
+            <ol>
+                <li>Sunucunuzun <code>http://localhost:3001</code> adresinde çalıştığından emin olun</li>
+                <li><code>YOUR_AGENT_ID_HERE</code> placeholder'ını gerçek ElevenLabs agent ID'niz ile değiştirin</li>
+                <li>Bu dosyayı doğrudan tarayıcınızda açın (file:// protokolü)</li>
+                <li>Tarayıcı konsolunda debug mesajlarını kontrol edin</li>
+                <li>Sağ alt köşede chat widget'ını arayın</li>
+            </ol>
+        </div>
+        
+        <div class="status" id="status">
+            <strong>Durum:</strong> Widget yükleniyor...
+        </div>
+        
+        <h3>Test Kontrolleri:</h3>
+        <button class="test-button" onclick="testWidget()">Widget Bağlantısını Test Et</button>
+        <button class="test-button" onclick="AIChatWidget.open()">Widget'ı Aç</button>
+        <button class="test-button" onclick="AIChatWidget.close()">Widget'ı Kapat</button>
+        <button class="test-button" onclick="AIChatWidget.toggle()">Widget'ı Aç/Kapat</button>
+        
+        <h3>Debug Bilgileri:</h3>
+        <div id="debug-info">
+            <p><strong>Mevcut URL:</strong> <span id="current-url"></span></p>
+            <p><strong>Protokol:</strong> <span id="protocol"></span></p>
+            <p><strong>Widget Mevcut:</strong> <span id="widget-available"></span></p>
+            <p><strong>Agent ID:</strong> <span id="agent-id"></span></p>
+        </div>
+    </div>
+
+    <!-- 
+    Widget Script - PLACEHOLDER AGENT ID İLE
+    
+    GÜVENLIK UYARISI: Bu dosyada placeholder kullanılıyor!
+    Gerçek kullanım için YOUR_AGENT_ID_HERE kısmını değiştirin.
+    -->
+    <script src="http://localhost:3001/widget.js" 
+        data-server-url="http://localhost:3001" 
+        data-agent-id="YOUR_AGENT_ID_HERE"></script>
+    
+    <script>
+        // Debug bilgilerini güncelle
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('agent-id').textContent = 'YOUR_AGENT_ID_HERE (placeholder)';
+        
+        // Widget bağlantısını test et
+        async function testWidget() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                statusDiv.innerHTML = '<strong>Durum:</strong> Bağlantı test ediliyor...';
+                statusDiv.className = 'status info';
+                
+                const response = await fetch('http://localhost:3001/api/health');
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    statusDiv.innerHTML = '<strong>Durum:</strong> ✅ Sunucu bağlantısı başarılı!';
+                    statusDiv.className = 'status success';
+                } else {
+                    statusDiv.innerHTML = '<strong>Durum:</strong> ❌ Sunucu beklenmeyen yanıt döndü';
+                    statusDiv.className = 'status error';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<strong>Durum:</strong> ❌ Sunucuya bağlanılamadı. http://localhost:3001 adresinde çalıştığından emin olun';
+                statusDiv.className = 'status error';
+                console.error('Bağlantı testi başarısız:', error);
+            }
+        }
+        
+        // Widget'ın mevcut olup olmadığını kontrol et
+        setTimeout(() => {
+            const widgetAvailable = typeof AIChatWidget !== 'undefined';
+            document.getElementById('widget-available').textContent = widgetAvailable ? 'Evet' : 'Hayır';
+            
+            if (widgetAvailable) {
+                // Agent ID placeholder kontrolü
+                const scriptTag = document.querySelector('script[data-agent-id]');
+                const agentId = scriptTag ? scriptTag.getAttribute('data-agent-id') : 'Bulunamadı';
+                
+                if (agentId === 'YOUR_AGENT_ID_HERE') {
+                    document.getElementById('status').innerHTML = '<strong>Durum:</strong> ⚠️ Widget yüklendi ama agent ID placeholder! Gerçek agent ID gerekli.';
+                    document.getElementById('status').className = 'status warning';
+                } else {
+                    document.getElementById('status').innerHTML = '<strong>Durum:</strong> ✅ Widget başarıyla yüklendi!';
+                    document.getElementById('status').className = 'status success';
+                }
+            } else {
+                document.getElementById('status').innerHTML = '<strong>Durum:</strong> ❌ Widget yüklenemedi';
+                document.getElementById('status').className = 'status error';
+            }
+        }, 2000);
+        
+        // Sayfa yüklendiğinde otomatik test
+        window.addEventListener('load', () => {
+            setTimeout(testWidget, 1000);
+        });
+    </script>
+</body>
+</html> 
