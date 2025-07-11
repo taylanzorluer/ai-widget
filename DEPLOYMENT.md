@@ -99,7 +99,7 @@ DEBUG_MODE → false
 ### **Embed Code**
 ```html
 <!-- Production embed -->
-<script src="https://your-project.vercel.app/widget.js" 
+<script src="https://your-project.vercel.app/js/widget.js" 
         data-agent-id="your_agent_id"></script>
 ```
 

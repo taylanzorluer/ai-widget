@@ -14,7 +14,8 @@ server/
 │   └── rateLimit.js          # Rate limiting
 ├── routes/
 │   ├── api.js                # API endpoints
-│   ├── widget.js             # Widget serving
+│   ├── js/
+  │   └── widget.js         # Widget serving
 │   └── health.js             # Health checks
 ├── utils/
 │   ├── circuitBreaker.js     # Circuit breaker pattern
@@ -168,7 +169,7 @@ Serves the React widget application.
 
 **Response:** HTML page with React app
 
-#### `GET /widget.js`
+#### `GET /js/widget.js`
 Serves the widget loader script.
 
 **Response:** JavaScript widget loader

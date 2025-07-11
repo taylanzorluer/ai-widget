@@ -72,6 +72,8 @@ dist
 
 # Public assets (contains test files with real credentials)
 public/
+# Exception: Allow public/js/ for widget.js distribution
+!public/js/
 
 # Storybook build outputs
 .out

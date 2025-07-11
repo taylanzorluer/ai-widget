@@ -120,14 +120,14 @@ cp test.example.html test.html
 
 #### **Method 2: Manual Integration**
 ```html
-<script src="https://your-domain.com/widget.js" 
+<script src="https://your-domain.com/js/widget.js" 
         data-server-url="https://your-domain.com" 
         data-agent-id="your_agent_id_here"></script>
 ```
 
 #### **Method 3: Development/Testing**
 ```html
-<script src="http://localhost:3001/widget.js" 
+<script src="http://localhost:3001/js/widget.js" 
         data-server-url="http://localhost:3001" 
         data-agent-id="agent_your_agent_id_here"></script>
 ```
@@ -139,11 +139,11 @@ Each customer can use their own ElevenLabs agent:
 
 ```html
 <!-- Customer A -->
-<script src="https://your-domain.com/widget.js" 
+<script src="https://your-domain.com/js/widget.js" 
         data-agent-id="agent_customer_a_id"></script>
 
 <!-- Customer B -->
-<script src="https://your-domain.com/widget.js" 
+<script src="https://your-domain.com/js/widget.js" 
         data-agent-id="agent_customer_b_id"></script>
 ```
 
@@ -181,7 +181,7 @@ npm start
 
 ### **Production Embed**
 ```html
-<script src="https://your-domain.vercel.app/widget.js" 
+<script src="https://your-domain.vercel.app/js/widget.js" 
         data-agent-id="your_agent_id"></script>
 ```
 

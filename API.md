@@ -20,7 +20,7 @@ All API endpoints are public and do not require authentication. ElevenLabs API k
 | GET | `/api/environment` | Environment info | No cache |
 | GET | `/api/health` | Health check | No cache |
 | GET | `/widget` | React widget app | Static |
-| GET | `/widget.js` | Widget loader | Static |
+| GET | `/js/widget.js` | Widget loader | Static |
 
 ## 🎯 Configuration Endpoints
 
@@ -276,7 +276,7 @@ HTML page with React application and embedded configuration.
 
 ---
 
-### `GET /widget.js`
+### `GET /js/widget.js`
 
 Serves the widget loader script for embedding.
 
@@ -285,7 +285,7 @@ None
 
 #### **Request Example**
 ```bash
-curl "http://localhost:3001/widget.js"
+curl "http://localhost:3001/js/widget.js"
 ```
 
 #### **Response**
@@ -294,14 +294,14 @@ JavaScript file containing the widget loader logic.
 #### **Usage**
 ```html
 <!-- Basic embed -->
-<script src="http://localhost:3001/widget.js"></script>
+<script src="http://localhost:3001/js/widget.js"></script>
 
 <!-- With agent ID -->
-<script src="http://localhost:3001/widget.js" 
+<script src="http://localhost:3001/js/widget.js" 
         data-agent-id="agent_123"></script>
 
 <!-- With custom server URL -->
-<script src="http://localhost:3001/widget.js" 
+<script src="http://localhost:3001/js/widget.js" 
         data-server-url="https://your-domain.com"
         data-agent-id="agent_123"></script>
 ```
@@ -472,7 +472,7 @@ import { useEffect } from 'react';
 function App() {
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'http://localhost:3001/widget.js';
+    script.src = 'http://localhost:3001/js/widget.js';
     script.setAttribute('data-agent-id', 'agent_123');
     document.body.appendChild(script);
   }, []);

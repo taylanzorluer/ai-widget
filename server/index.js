@@ -340,5 +340,5 @@ app.listen(PORT, () => {
   console.log(`Widget available at: http://localhost:${PORT}/widget`);
   console.log(`Test page: http://localhost:${PORT}/test.html`);
   console.log(`Example page: http://localhost:${PORT}/example.html`);
-  console.log(`Embed script: <script src="http://localhost:${PORT}/widget.js"></script>`);
+  console.log(`Embed script: <script src="http://localhost:${PORT}/js/widget.js"></script>`);
 }); 
