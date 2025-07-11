@@ -121,8 +121,23 @@ Development-only component showing:
 - Connection establishment
 - Message sending/receiving
 - Error handling
-- Automatic reconnection
-- Proper cleanup
+- NO automatic reconnection (prevents cost escalation)
+- Proper cleanup with complete socket termination
+```
+
+### **Socket Connection Lifecycle**
+```javascript
+// Connection States:
+1. CONNECTING → Attempting to establish connection
+2. OPEN → Connected and ready to send/receive messages
+3. CLOSING → Connection is being closed
+4. CLOSED → Connection terminated (manual or error)
+
+// Termination Policy:
+- Manual close (X button): Immediate termination, no reconnection
+- Parent widget close: Complete cleanup, no reconnection
+- Network error: Graceful termination, no reconnection
+- Component unmount: Full cleanup, no reconnection
 ```
 
 ### **Message Flow**
@@ -135,9 +150,19 @@ Development-only component showing:
 ### **Disconnect Handling**
 ```javascript
 // Multiple disconnect methods:
-1. Internal X button → disconnect + clear + keep widget open
-2. External close button → disconnect + clear + hide widget
-3. Component unmount → automatic cleanup
+1. Internal X button → disconnect + clear + keep widget open + NO reconnection
+2. External close button → disconnect + clear + hide widget + NO reconnection
+3. Component unmount → automatic cleanup + NO reconnection
+4. Connection loss → disconnect + clear + NO reconnection (requires page refresh)
+```
+
+### **⚠️ Important: No Automatic Reconnection**
+```javascript
+// New behavior (prevents excessive costs):
+- Once disconnected (manually or by error), NO automatic reconnection
+- User must refresh the page to start a new conversation
+- This prevents continuous reconnection attempts and reduces costs
+- Clear messaging informs users to refresh for new conversations
 ```
 
 ## 🌍 Environment Detection
@@ -300,6 +325,27 @@ wss://api.elevenlabs.io/v1/convai/conversation
 window.AIChatWidget.debug() // Show debug info
 window.AIChatWidget.getState() // Get current state
 window.AIChatWidget.clearCache() // Clear cache
+```
+
+### **Troubleshooting Connection Issues**
+```javascript
+// Common Issues and Solutions:
+
+1. "Chat ended" message appears:
+   - Expected behavior after close button or connection loss
+   - Solution: Refresh the page to start new conversation
+
+2. Input field disabled:
+   - Occurs when chat is intentionally ended
+   - Solution: Refresh the page to re-enable
+
+3. No reconnection after network error:
+   - Intentional behavior to prevent cost escalation
+   - Solution: Refresh the page to reconnect
+
+4. Multiple connection attempts:
+   - Check for proper cleanup in endConversation()
+   - Ensure isIntentionalDisconnect flag is set correctly
 ```
 
 ## 📦 Build Process

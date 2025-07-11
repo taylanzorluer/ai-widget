@@ -93,4 +93,7 @@ temp/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+# Generated widget embed script
+public/widget.js

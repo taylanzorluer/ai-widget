@@ -1,17 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const ChatWidget = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [config, setConfig] = useState({ title: 'AI Assistant', subtitle: 'How can I help you today?' });
+  // eslint-disable-next-line no-unused-vars
   const [widgetConfig, setWidgetConfig] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [conversationId, setConversationId] = useState(null);
   const [wsConnection, setWsConnection] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isDev, setIsDev] = useState(false);
   const [messageQueue, setMessageQueue] = useState([]); // Queue for messages when disconnected
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [isIntentionalDisconnect, setIsIntentionalDisconnect] = useState(false); // Track manual disconnections
+  const [isTimeoutDisconnect, setIsTimeoutDisconnect] = useState(false); // Track timeout/network disconnections
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
@@ -67,7 +71,7 @@ const ChatWidget = () => {
   }, [messages]);
 
   // Process message queue when connected
-  const processMessageQueue = () => {
+  const processMessageQueue = useCallback(() => {
     if (isConnected && wsConnection && messageQueue.length > 0) {
       console.log('Processing message queue:', messageQueue.length, 'messages');
       
@@ -84,7 +88,7 @@ const ChatWidget = () => {
       // Clear the queue after processing
       setMessageQueue([]);
     }
-  };
+  }, [isConnected, wsConnection, messageQueue]);
 
   // Process queue when connection state changes
   useEffect(() => {
@@ -94,7 +98,7 @@ const ChatWidget = () => {
         processMessageQueue();
       }, 500);
     }
-  }, [isConnected, wsConnection, messageQueue]);
+  }, [isConnected, wsConnection, messageQueue, processMessageQueue]);
 
   // Load configuration and establish WebSocket connection on component mount
   useEffect(() => {
@@ -111,11 +115,9 @@ const ChatWidget = () => {
     const handleMessage = (event) => {
       if (event.data.type === 'DISCONNECT_AND_CLEAR' && event.data.source === 'ai-chat-widget') {
         console.log('Received disconnect message from parent widget');
+        setIsIntentionalDisconnect(true); // Mark as intentional before disconnecting
         disconnectWebSocket();
         clearConversationData();
-      } else if (event.data.type === 'WIDGET_REOPENED' && event.data.source === 'ai-chat-widget') {
-        console.log('Widget reopened, checking connection...');
-        handleWidgetReopen();
       }
     };
     
@@ -124,43 +126,24 @@ const ChatWidget = () => {
     // Cleanup WebSocket on unmount
     return () => {
       console.log('Component unmounting, cleaning up WebSocket...');
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
+      try {
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+        setIsIntentionalDisconnect(true); // Mark as intentional before cleanup
+        disconnectWebSocket();
+        window.removeEventListener('message', handleMessage);
+        console.log('Component cleanup completed');
+      } catch (error) {
+        console.error('Error during component cleanup:', error);
       }
-      disconnectWebSocket();
-      window.removeEventListener('message', handleMessage);
     };
     // eslint-disable-next-line
   }, []);
 
-  // Handle widget reopen
-  const handleWidgetReopen = () => {
-    if (!isConnected && !isReconnecting) {
-      console.log('Widget reopened and not connected, attempting reconnection...');
-      const urlParams = new URLSearchParams(window.location.search);
-      const agentId = urlParams.get('agentId');
-      connectWebSocket(agentId);
-    }
-  };
 
-  // Auto-reconnect when widget is visible and not connected
-  useEffect(() => {
-    const checkReconnection = () => {
-      // Check if widget is visible and not connected
-      if (document.visibilityState === 'visible' && !isConnected && !isReconnecting) {
-        console.log('Widget is visible but not connected, attempting reconnection...');
-        const urlParams = new URLSearchParams(window.location.search);
-        const agentId = urlParams.get('agentId');
-        connectWebSocket(agentId);
-      }
-    };
 
-    document.addEventListener('visibilitychange', checkReconnection);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', checkReconnection);
-    };
-  }, [isConnected, isReconnecting]);
+
 
   const fetchConfig = async (agentId) => {
     try {
@@ -279,22 +262,32 @@ const ChatWidget = () => {
         setWsConnection(null);
         setIsReconnecting(false);
         
-        // If connection was closed unexpectedly (not by user), show message and attempt reconnect
-        if (event.code !== 1000 && event.reason !== 'Conversation ended by user') {
-          console.log('Unexpected disconnection detected');
+        // Check if this was an intentional disconnect (manual close)
+        if (isIntentionalDisconnect) {
+          console.log('Intentional disconnect detected, not attempting to reconnect');
           setMessages(prev => [...prev.filter(msg => msg.id !== 'typing'), {
             id: Date.now(),
-            text: 'Connection lost. Attempting to reconnect...',
+            text: 'Sohbet kapatıldı. Yeni sohbet başlatmak için sayfayı yenileyin.',
+            sender: 'ai',
+            timestamp: new Date().toISOString()
+          }]);
+          setIsLoading(false);
+          return;
+        }
+        
+        // If connection was closed unexpectedly (not by user), show message and allow reconnection
+        if (event.code !== 1000 && event.reason !== 'Conversation ended by user') {
+          console.log('Unexpected disconnection detected - timeout or network issue');
+          setIsTimeoutDisconnect(true);
+          setMessages(prev => [...prev.filter(msg => msg.id !== 'typing'), {
+            id: Date.now(),
+            text: 'Sohbet uzun süre beklemeden sonra kapatıldı. Tekrar başlatmak için lütfen bir şeyler yazınız.',
             sender: 'ai',
             timestamp: new Date().toISOString()
           }]);
           setIsLoading(false);
           
-          // Attempt to reconnect after 3 seconds
-          reconnectTimeoutRef.current = setTimeout(() => {
-            console.log('Attempting to reconnect...');
-            connectWebSocket(agentId);
-          }, 3000);
+          console.log('Connection will be reestablished when user types');
         }
       };
       
@@ -304,19 +297,22 @@ const ChatWidget = () => {
         setIsReconnecting(false);
         setIsLoading(false);
         
-        // Add error message to chat
+        // Check if this was an intentional disconnect
+        if (isIntentionalDisconnect) {
+          console.log('Error on intentional disconnect, not attempting to reconnect');
+          return;
+        }
+        
+        // Add error message to chat and allow reconnection
+        setIsTimeoutDisconnect(true);
         setMessages(prev => [...prev.filter(msg => msg.id !== 'typing'), {
           id: Date.now(),
-          text: 'Connection error occurred. Please check your internet connection. Retrying...',
+          text: 'Bağlantı hatası oluştu. Tekrar başlatmak için lütfen bir şeyler yazınız.',
           sender: 'ai',
           timestamp: new Date().toISOString()
         }]);
 
-        // Attempt to reconnect after 5 seconds
-        reconnectTimeoutRef.current = setTimeout(() => {
-          console.log('Retrying connection after error...');
-          connectWebSocket(agentId);
-        }, 5000);
+        console.log('Connection will be reestablished when user types');
       };
     } catch (error) {
       console.error('Failed to connect WebSocket:', error);
@@ -391,8 +387,29 @@ const ChatWidget = () => {
       };
       wsConnection.send(JSON.stringify(messageData));
       console.log('Message sent immediately:', messageText);
+    } else if (isIntentionalDisconnect) {
+      console.log('Chat ended, cannot send message');
+      
+      // Remove typing indicator
+      setMessages(prev => prev.filter(msg => msg.id !== 'typing'));
+      setIsLoading(false);
+      
+      // Show disconnection message
+      const disconnectionMessage = {
+        id: Date.now() + 1,
+        text: 'Sohbet kapatıldı. Yeni sohbet başlatmak için sayfayı yenileyin.',
+        sender: 'ai',
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, disconnectionMessage]);
     } else {
       console.log('Not connected, queuing message and attempting to connect...');
+      
+      // If this is a timeout disconnect, reset the timeout state to allow reconnection
+      if (isTimeoutDisconnect) {
+        console.log('Timeout disconnect detected, resetting state for reconnection');
+        setIsTimeoutDisconnect(false);
+      }
       
       // Add message to queue
       setMessageQueue(prev => [...prev, { text: messageText, timestamp: new Date().toISOString() }]);
@@ -404,7 +421,7 @@ const ChatWidget = () => {
       // Show connection message
       const connectionMessage = {
         id: Date.now() + 1,
-        text: 'Connecting to assistant...',
+        text: 'Bağlanıyor...',
         sender: 'ai',
         timestamp: new Date().toISOString()
       };
@@ -428,13 +445,27 @@ const ChatWidget = () => {
 
   const endConversation = () => {
     console.log('Ending conversation...');
-    disconnectWebSocket();
-    clearConversationData();
+    try {
+      disconnectWebSocket();
+      clearConversationData();
+      console.log('Conversation ended successfully');
+    } catch (error) {
+      console.error('Error ending conversation:', error);
+      // Ensure cleanup even if there's an error
+      setIsIntentionalDisconnect(true);
+      setWsConnection(null);
+      setIsConnected(false);
+      setIsReconnecting(false);
+    }
   };
 
   const disconnectWebSocket = () => {
     console.log('Manually disconnecting WebSocket...');
     
+    // Mark as intentional disconnect first
+    setIsIntentionalDisconnect(true);
+    
+    // Clear any pending reconnection timeouts
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -442,6 +473,16 @@ const ChatWidget = () => {
     
     if (wsConnection) {
       console.log('Current WebSocket state:', wsConnection.readyState);
+      
+      // Remove all event listeners to prevent any callbacks
+      try {
+        wsConnection.onopen = null;
+        wsConnection.onmessage = null;
+        wsConnection.onclose = null;
+        wsConnection.onerror = null;
+      } catch (error) {
+        console.error('Error removing event listeners:', error);
+      }
       
       // Force close regardless of state
       try {
@@ -460,7 +501,7 @@ const ChatWidget = () => {
       setIsReconnecting(false);
     }
     
-    console.log('WebSocket disconnected manually');
+    console.log('WebSocket disconnected manually with complete cleanup');
   };
 
   const clearConversationData = () => {
@@ -469,6 +510,8 @@ const ChatWidget = () => {
     setConversationId(null);
     setIsLoading(false);
     setMessageQueue([]); // Clear message queue
+    setIsIntentionalDisconnect(false); // Reset intentional disconnect flag
+    setIsTimeoutDisconnect(false); // Reset timeout disconnect flag
     console.log('Conversation data cleared');
   };
 
@@ -526,14 +569,14 @@ const ChatWidget = () => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={isConnected ? "Type your message..." : "Type your message (will be sent when connected)..."}
+            placeholder={isIntentionalDisconnect ? "Sohbet kapatıldı. Yeni sohbet için sayfayı yenileyin." : isTimeoutDisconnect ? "Bağlantı kesildi. Yazmaya başlayın, otomatik bağlanacak." : isConnected ? "Mesajınızı yazın..." : "Mesajınızı yazın (bağlandığında gönderilecek)..."}
             rows="1"
-            disabled={isLoading}
+            disabled={isLoading || isIntentionalDisconnect}
           />
           <button
             className="send-button"
             onClick={sendMessage}
-            disabled={isLoading || !inputMessage.trim()}
+            disabled={isLoading || !inputMessage.trim() || isIntentionalDisconnect}
           >
             <svg className="send-icon" viewBox="0 0 24 24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Widget Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .feature {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            transition: transform 0.3s ease;
+        }
+        .feature:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+        .feature h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .feature p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        .cta {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .cta h2 {
+            margin-bottom: 15px;
+        }
+        .cta p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .footer {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        .icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Chat Widget</h1>
+        <p class="subtitle">Güçlü AI asistanınız artık sitenizde!</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="icon">💬</div>
+                <h3>Gerçek Zamanlı Sohbet</h3>
+                <p>ElevenLabs AI ile doğal ve akıcı konuşmalar yapın. Sesli yanıtlar ve gelişmiş NLP desteği.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="icon">🎯</div>
+                <h3>Kolay Entegrasyon</h3>
+                <p>Tek satır kodla herhangi bir web sitesine entegre edin. Özelleştirilebilir tasarım ve renkler.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="icon">🔧</div>
+                <h3>Gelişmiş Özellikler</h3>
+                <p>Otomatik yeniden bağlanma, mesaj kuyruğu, çoklu agent desteği ve profesyonel görünüm.</p>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <h2>Sohbeti Başlatın!</h2>
+            <p>Sağ alt köşedeki "Destek Al" butonuna tıklayarak AI asistanınızla konuşmaya başlayın.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Bu örnek sayfayı kopyalayıp kendi projenizde kullanabilirsiniz.</p>
+            <p>Daha fazla bilgi için GitHub repository'sini ziyaret edin.</p>
+        </div>
+    </div>
+
+    <!-- 
+    AI Chat Widget Integration
+    
+    ÖNEMLI: Aşağıdaki değerleri kendi bilgilerinizle değiştirin:
+    - data-server-url: Widget sunucunuzun URL'si
+    - data-agent-id: ElevenLabs agent ID'niz
+    -->
+    <script src="https://your-domain.com/widget.js" 
+            data-server-url="https://your-domain.com" 
+            data-agent-id="your_agent_id_here"></script>
+    
+    <!-- 
+    Geliştirme için localhost kullanımı:
+    <script src="http://localhost:3001/widget.js" 
+            data-server-url="http://localhost:3001" 
+            data-agent-id="agent_your_agent_id_here"></script>
+    -->
+</body>
+</html> 

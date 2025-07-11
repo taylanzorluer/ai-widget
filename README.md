@@ -104,12 +104,24 @@ Server runs on `http://localhost:3001`
 
 ### 4. Embed Widget
 
-#### **Method 1: Auto-detection**
-```html
-<script src="http://localhost:3001/widget.js"></script>
+#### **Method 1: Use Example File (Recommended)**
+```bash
+# Copy the example file to your project
+cp example.html your-website.html
+
+# Edit the script tag with your details:
+# - Replace "your-domain.com" with your domain
+# - Replace "your_agent_id_here" with your ElevenLabs agent ID
 ```
 
-#### **Method 2: With specific agent (Recommended)**
+#### **Method 2: Manual Integration**
+```html
+<script src="https://your-domain.com/widget.js" 
+        data-server-url="https://your-domain.com" 
+        data-agent-id="your_agent_id_here"></script>
+```
+
+#### **Method 3: Development/Testing**
 ```html
 <script src="http://localhost:3001/widget.js" 
         data-server-url="http://localhost:3001" 
@@ -242,18 +254,39 @@ Development features (localhost only):
 - **Proper Cleanup**: Closes connection on widget close
 - **Dual Close Buttons**: Both X and Close buttons disconnect
 - **Error Handling**: Graceful connection error management
+- **⚠️ NO Auto-Reconnection**: Prevents cost escalation from multiple reconnections
 
 ### **Disconnect Methods**
-1. **Internal X Button**: Closes connection + clears chat
-2. **External Close Button**: Closes connection + clears chat + hides widget
-3. **Component Unmount**: Automatic cleanup
+1. **Internal X Button**: Closes connection + clears chat + NO reconnection
+2. **External Close Button**: Closes connection + clears chat + hides widget + NO reconnection
+3. **Component Unmount**: Automatic cleanup + NO reconnection
+4. **Network Error**: Graceful termination + NO reconnection
+
+### **Important: Smart Reconnection**
+```javascript
+// Smart reconnection behavior:
+- Manual close (X button): No reconnection, user must refresh
+- Timeout/Network error: Auto-reconnect when user starts typing
+- User-friendly Turkish messages for all states
+- Clear guidance for users in each scenario
+```
+
+### **User Experience Features**
+```javascript
+// Enhanced UX:
+- Turkish language support for all messages
+- Auto-reconnection on typing after timeout
+- Different behavior for manual vs automatic disconnections
+- Clear placeholder text showing current state
+- Smooth transitions between connection states
+```
 
 ## 🧪 Testing
 
 ### **Test Pages**
-- **Test Page**: `http://localhost:3001/test.html`
-- **Example Page**: `http://localhost:3001/example.html`
-- **Widget Direct**: `http://localhost:3001/widget`
+- **Test Page**: `http://localhost:3001/test.html` - Development testing
+- **Example Page**: `example.html` - Production-ready example file
+- **Widget Direct**: `http://localhost:3001/widget` - Direct widget access
 
 ### **Debug Console**
 ```javascript
@@ -300,6 +333,30 @@ curl http://localhost:3001/api/health
 # Monitor server logs
 # Check cache hit rates
 # Verify circuit breaker status
+```
+
+#### **"Sohbet kapatıldı" (Chat Ended) Message**
+```bash
+# Expected behavior after:
+- Clicking X button (manual close)
+- Component unmount
+
+# Solution: Refresh page to start new conversation
+```
+
+#### **"Bağlantı kesildi" (Connection Lost) Message**
+```bash
+# Expected behavior after:
+- Network timeout or connection error
+- Server unavailable
+
+# Solution: Start typing - connection will auto-reconnect
+```
+
+#### **Input Field Disabled**
+```bash
+# Occurs when chat is manually ended (X button)
+# Solution: Refresh page to re-enable input
 ```
 
 ## 📊 Monitoring
