@@ -74,6 +74,8 @@ dist
 public/
 # Exception: Allow public/js/ for widget.js distribution
 !public/js/
+# Exception: Allow client/public/ for React app
+!client/public/
 
 # Storybook build outputs
 .out
